@@ -360,7 +360,12 @@ body <- dashboardBody(
             solidHeader = TRUE,
             width = NULL,
             div(style = "padding: 10px; font-size: 16px; line-height: 1.6;",
-              HTML("The <b>HUD Public Housing Developments dataset</b> provides a national snapshot of federally assisted housing across the United States. Each development is represented by the building with the largest number of units, ensuring consistency while protecting privacy. The dataset combines <b>geographic coordinates</b> with detailed information on housing units, occupancy, household demographics, income, and federal spending. It tracks characteristics such as the number of occupied and vacant units, average household size, age distribution, disability status, and racial/ethnic composition. Financial measures include household income, rent contributions, utility allowances, and federal subsidies. Poverty levels are also recorded at the census tract level, offering insight into the broader community context. Updated quarterly, the dataset supports research, planning, and policy development by highlighting patterns of affordability, inequality, and neighborhood conditions. By making this information publicly available, HUD enables policymakers, researchers, and advocates to better understand and improve public housing nationwide.")
+              HTML("The <b>HUD Public Housing Developments dataset</b> provides a national snapshot of federally assisted housing across the United States. Each development is represented by the building with the largest number of units, ensuring consistency while protecting privacy. The dataset combines <b>geographic coordinates</b> with detailed information on housing units, occupancy, household demographics, income, and federal spending. It tracks characteristics such as the number of occupied and vacant units, average household size, age distribution, disability status, and racial/ethnic composition. Financial measures include household income, rent contributions, utility allowances, and federal subsidies. Poverty levels are also recorded at the census tract level, offering insight into the broader community context. Updated quarterly, the dataset supports research, planning, and policy development by highlighting patterns of affordability, inequality, and neighborhood conditions. By making this information publicly available, HUD enables policymakers, researchers, and advocates to better understand and improve public housing nationwide."),
+              br(), br(),
+              tags$a(href = "https://hudgis-hud.opendata.arcgis.com/datasets/HUD::public-housing-developments-1/about", 
+                     target = "_blank", 
+                     style = "color: #3c8dbc; font-weight: bold;",
+                     icon("external-link-alt"), " View Dataset & Documentation")
             )
           )
         )
@@ -480,7 +485,7 @@ body <- dashboardBody(
       fluidRow(
         column(width = 8,
           box(
-            title = "Top 10 States â€” Metric Analysis",
+            title = "Top 10 States - Metric Analysis",
             status = "primary",
             solidHeader = TRUE,
             width = NULL,
@@ -575,7 +580,7 @@ body <- dashboardBody(
       fluidRow(
         column(width = 12,
           box(
-            title = "Top 10 States â€” Income Distribution",
+            title = "Top 10 States - Income Distribution",
             status = "primary",
             solidHeader = TRUE,
             width = NULL,
@@ -668,16 +673,73 @@ body <- dashboardBody(
     
     tabItem(
       tabName = "states",
-      h2("Statistical Insights"),
+      h2("Statistical Analysis & Models"),
       
+      # Row 1: Key Performance Indicators (Top Level)
       fluidRow(
-        column(width = 12,
+        valueBoxOutput("stats_r2_box", width = 4),
+        valueBoxOutput("stats_p_box", width = 4),
+        valueBoxOutput("stats_driver_box", width = 4)
+      ),
+      
+      # Row 2: Main Content Area
+      fluidRow(
+        # Left Column: Controls & Guide
+        column(width = 3,
           box(
-            title = "Key Trends & Relationships",
+            title = "Analysis Settings",
             status = "primary",
             solidHeader = TRUE,
             width = NULL,
-            uiOutput("statistics_report")
+            background = "navy",
+            selectInput("stats_model_select", "Select Analysis Question:",
+                        choices = c(
+                          "What drives Monthly Rent?" = "R2",
+                          "What determines Household Income?" = "I1",
+                          "What affects Occupancy Rates?" = "O1",
+                          "Does Bedroom Size affect Rent?" = "R1",
+                          "What influences Project Spending?" = "L1",
+                          "What predicts Wait Times?" = "L2"
+                        ),
+                        selected = "R2"),
+            p(style = "font-size: 13px; color: #bdc3c7; margin-top: 10px;",
+              "Choose a question above to update the statistical model and insights.")
+          ),
+          
+          box(
+            title = "Statistical Guide",
+            status = "info",
+            solidHeader = TRUE,
+            width = NULL,
+            collapsible = TRUE,
+            collapsed = FALSE,
+            div(style = "font-size: 13px; line-height: 1.6; color: #333;",
+              tags$ul(style = "padding-left: 15px; margin-bottom: 0;",
+                tags$li(style="margin-bottom: 8px;", tags$strong("R-Squared (R²):"), br(), "Model Strength (0-100%). Higher is better."),
+                tags$li(style="margin-bottom: 8px;", tags$strong("P-Value:"), br(), "Significance check. < 0.05 is good."),
+                tags$li(style="margin-bottom: 8px;", tags$strong("Estimate:"), br(), "Impact per unit change."),
+                tags$li(tags$strong("Std. Error:"), br(), "Margin of error.")
+              )
+            )
+          )
+        ),
+        
+        # Right Column: Insights & Data
+        column(width = 9,
+          box(
+            title = "Model Insights",
+            status = "primary",
+            solidHeader = TRUE,
+            width = NULL,
+            uiOutput("stats_model_interpretation")
+          ),
+          
+          box(
+            title = "Variable Impact Analysis",
+            status = "primary",
+            solidHeader = TRUE,
+            width = NULL,
+            DTOutput("stats_coef_table")
           )
         )
       )
@@ -695,6 +757,12 @@ body <- dashboardBody(
           status = "primary", 
           solidHeader = TRUE,
           width = 12,
+          p(
+            "Data Source: ",
+            tags$a(href = "https://hudgis-hud.opendata.arcgis.com/datasets/HUD::public-housing-developments-1/about", 
+                   target = "_blank", 
+                   "HUD Public Housing Developments Dataset")
+          ),
           DTOutput("data_table_output"),
           br(),
           downloadButton("download_csv", "Download CSV", class = "btn-success")
@@ -1108,7 +1176,7 @@ server <- function(input, output, session) {
 
       long <- bind_rows(results)
       bracket_labels <- c(pct_lt5k = '< $5k', pct_5k_lt10k = '$5k-$10k', pct_10k_lt15k = '$10k-$15k', pct_15k_lt20k = '$15k-$20k', pct_ge20k = '>= $20k')
-      bed_labels <- c(pct_bed1 = '% 1 bedroom units', pct_bed2 = '% 2 bedroom units', pct_bed3 = '% 3+ bedroom units', pct_overhoused = '% overhoused')
+      bed_labels <- c(pct_bed1 = '1 Bedroom Units', pct_bed2 = '2 Bedroom Units', pct_bed3 = '3 Bedroom Units', pct_overhoused = '3+ Bedroom Units')
       long <- long %>% mutate(bracket_label = unname(bracket_labels[bracket]), bedroom_label = unname(bed_labels[bedroom]))
 
       bedroom_order <- unique(bed_labels[intersect(bed_cols, beds)])
@@ -1145,7 +1213,7 @@ server <- function(input, output, session) {
       pct_of_total <- totals / sum(totals, na.rm = TRUE) * 100
     }
 
-    labels <- c(pct_bed1 = '% 1 bedroom units', pct_bed2 = '% 2 bedroom units', pct_bed3 = '% 3+ bedroom units', pct_overhoused = '% overhoused')
+    labels <- c(pct_bed1 = '1 Bedroom Units', pct_bed2 = '2 Bedroom Units', pct_bed3 = '3 Bedroom Units', pct_overhoused = '3+ Bedroom Units')
     items <- lapply(seq_along(existing), function(i) {
       key <- existing[i]
       lbl <- labels[[key]]
@@ -2088,125 +2156,257 @@ server <- function(input, output, session) {
   })
   
   
-  output$statistics_report <- renderUI({
+  # --- Statistics Page Logic ---
+  
+  # Variable Labels Helper
+  var_labels <- c(
+    "rent_per_month" = "Monthly Rent ($)",
+    "hh_income" = "Household Income ($)",
+    "pct_lt30_median" = "Poverty Rate (%)",
+    "pct_bed1" = "1-Bedroom Units (%)",
+    "pct_bed2" = "2-Bedroom Units (%)",
+    "pct_bed3" = "3+ Bedroom Units (%)",
+    "pct_overhoused" = "Overhoused Units (%)",
+    "pct_occupied" = "Occupancy Rate (%)",
+    "pct_minority" = "Minority Population (%)",
+    "people_per_unit" = "Avg Household Size",
+    "pct_wage_major" = "Income from Wages (%)",
+    "pct_welfare_major" = "Income from Welfare (%)",
+    "pct_other_major" = "Other Income Sources (%)",
+    "pct_female_head_child" = "Female Head w/ Child (%)",
+    "spending_per_month" = "Fed Spending/Unit ($)",
+    "total_dwelling_units" = "Total Units",
+    "pct_disabled_all" = "Disabled Population (%)",
+    "annl_expns_amnt_prev_yr" = "Annual Expenses (Prev Yr)",
+    "months_waiting" = "Wait Time (Months)",
+    "place_level" = "Location Index"
+  )
+  
+  get_label <- function(var) {
+    if (var %in% names(var_labels)) return(var_labels[[var]])
+    return(var)
+  }
+
+  # Reactive dataset for statistics
+  stats_data <- reactive({
     df <- filtered_data()
     req(nrow(df) > 10)
-
-    cols_to_num <- c("rent_per_month", "hh_income", "pct_bed1", "pct_bed2", "pct_bed3", "pct_overhoused", 
-                     "pct_1adult", "pct_2adults", "pct_minority", "pct_age62plus", "vacancy_rate", 
-                     "pct_lt24_head", "pct_age25_50", "pct_age51_61")
     
-    existing <- intersect(cols_to_num, names(df))
-    df_stat <- df %>% select(all_of(existing)) %>% mutate(across(everything(), as.numeric))
-    
-    if(all(c("pct_bed1", "pct_bed2", "pct_bed3") %in% names(df_stat))) {
-       df_stat$avg_beds <- (df_stat$pct_bed1 * 1 + df_stat$pct_bed2 * 2 + df_stat$pct_bed3 * 3) / 100
-       if("pct_overhoused" %in% names(df_stat)) {
-         df_stat$avg_beds <- df_stat$avg_beds + (df_stat$pct_overhoused * 4) / 100
-       }
-    } else {
-      df_stat$avg_beds <- NA
-    }
-
-    generate_card <- function(y, x, title, question, icon_name, color_theme) {
-       if(is.null(df_stat[[y]]) || is.null(df_stat[[x]])) return(NULL)
-       clean <- df_stat %>% filter(!is.na(.data[[y]]), !is.na(.data[[x]]))
-       if(nrow(clean) < 10) return(NULL)
-       
-       mod <- lm(clean[[y]] ~ clean[[x]])
-       s <- summary(mod)
-       
-       if(nrow(s$coefficients) < 2) return(NULL)
-       
-       coef <- s$coefficients[2, 1]
-       pval <- s$coefficients[2, 4]
-       r2 <- s$r.squared
-       
-       is_sig <- pval < 0.05
-       direction <- if(coef > 0) "Positive" else "Negative"
-       strength_val <- sqrt(r2) # Approximate correlation magnitude
-       if(is.na(strength_val)) strength_val <- 0
-       
-       status_text <- if(is_sig) paste("Significant", direction) else "No Significant Link"
-       status_color <- if(is_sig) color_theme else "#95a5a6"
-       
-       explanation <- ""
-       if(is_sig) {
-         explanation <- paste0("As <b>", tolower(question), "</b> increases, <b>", tolower(title), "</b> tends to ", 
-                               if(coef > 0) "increase." else "decrease.")
-       } else {
-         explanation <- paste0("Changes in ", tolower(question), " do not reliably predict ", tolower(title), ".")
-       }
-
-       pval_fmt <- if(pval < 0.001) "< 0.001" else round(pval, 3)
-       r2_fmt <- round(r2, 3)
-       
-       paste0(
-         "<div class='col-sm-6 col-lg-4' style='margin-bottom: 25px;'>",
-           "<div style='background: #fff; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); transition: transform 0.2s; height: 100%; overflow: hidden; border: 1px solid #eee;'>",
-             
-             "<div style='padding: 20px; border-bottom: 1px solid #f0f0f0; background: linear-gradient(to right, #ffffff, #fbfbfb);'>",
-               "<div style='display: flex; align-items: center;'>",
-                 "<div style='background: ", paste0(color_theme, "15"), "; color: ", color_theme, "; width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-right: 15px; font-size: 20px;'>",
-                   "<i class='fa fa-", icon_name, "'></i>",
-                 "</div>",
-                 "<div>",
-                   "<h5 style='margin: 0; font-weight: 700; color: #2c3e50; font-size: 16px;'>", title, "</h5>",
-                   "<div style='font-size: 13px; color: #7f8c8d; margin-top: 4px;'> <i class='fa fa-arrow-right' style='font-size: 10px;'></i> vs. ", question, "</div>",
-                 "</div>",
-               "</div>",
-             "</div>",
-             
-             "<div style='padding: 20px;'>",
-               
-               "<div style='margin-bottom: 20px;'>",
-                 "<span style='background: ", if(is_sig) paste0(color_theme, "20") else "#f0f0f0", "; color: ", if(is_sig) color_theme else "#7f8c8d", "; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;'>",
-                   status_text,
-                 "</span>",
-                 "<p style='margin-top: 12px; font-size: 14px; line-height: 1.5; color: #34495e;'>", explanation, "</p>",
-               "</div>",
-               
-               "<div style='background: #f8f9fa; border-radius: 8px; padding: 12px; display: flex; justify-content: space-between;'>",
-                 "<div style='text-align: center; flex: 1; border-right: 1px solid #eee;'>",
-                   "<div style='font-size: 11px; text-transform: uppercase; color: #95a5a6; font-weight: 600;'>P-Value</div>",
-                   "<div style='font-size: 16px; font-weight: 700; color: #2c3e50; margin-top: 4px;'>", pval_fmt, "</div>",
-                   "<div style='font-size: 10px; color: #bdc3c7;'>Prob. of chance</div>",
-                 "</div>",
-                 "<div style='text-align: center; flex: 1;'>",
-                   "<div style='font-size: 11px; text-transform: uppercase; color: #95a5a6; font-weight: 600;'>R-Squared</div>",
-                   "<div style='font-size: 16px; font-weight: 700; color: #2c3e50; margin-top: 4px;'>", r2_fmt, "</div>",
-                   "<div style='font-size: 10px; color: #bdc3c7;'>Effect size</div>",
-                 "</div>",
-               "</div>",
-               
-             "</div>",
-           "</div>",
-         "</div>"
-       )
-    }
-    
-    cards <- list(
-      generate_card("rent_per_month", "avg_beds", "Monthly Rent", "Apartment Size", "home", "#3498db"),
-      generate_card("hh_income", "avg_beds", "Household Income", "Apartment Size", "wallet", "#3498db"),
-      generate_card("rent_per_month", "hh_income", "Monthly Rent", "Household Income", "money-bill-wave", "#3498db"),
-      
-      generate_card("hh_income", "pct_minority", "Household Income", "Minority Population %", "users", "#e67e22"),
-      generate_card("rent_per_month", "pct_1adult", "Monthly Rent", "Single-Parent Homes %", "child", "#e67e22"),
-      generate_card("hh_income", "pct_1adult", "Household Income", "Single-Parent Homes %", "user-friends", "#e67e22"),
-      
-      generate_card("hh_income", "pct_age62plus", "Household Income", "Senior Population %", "blind", "#2ecc71"),
-      generate_card("rent_per_month", "pct_age62plus", "Monthly Rent", "Senior Population %", "hospital", "#2ecc71"),
-      generate_card("avg_beds", "pct_age62plus", "Apartment Size", "Senior Population %", "bed", "#2ecc71"),
-      
-      generate_card("avg_beds", "pct_minority", "Apartment Size", "Minority Population %", "chart-pie", "#9b59b6"),
-      generate_card("rent_per_month", "vacancy_rate", "Monthly Rent", "Vacancy Rate", "door-open", "#9b59b6")
+    # Ensure columns exist and are numeric
+    cols_needed <- c(
+      'rent_per_month', 'pct_bed1', 'pct_bed2', 'pct_bed3', 'pct_overhoused', 'hh_income',
+      'pct_lt30_median', 'pct_occupied', 'pct_minority', 'people_per_unit',
+      'pct_wage_major', 'pct_welfare_major', 'pct_other_major',
+      'pct_female_head_child', 'spending_per_month', 'total_dwelling_units',
+      'pct_disabled_all', 'annl_expns_amnt_prev_yr', 'months_waiting',
+      'place_level'
     )
     
-    content <- paste(unlist(cards), collapse = "")
+    # Check which columns are actually in the dataset
+    available_cols <- intersect(cols_needed, names(df))
+    
+    df_clean <- df %>%
+      select(all_of(available_cols)) %>%
+      mutate(across(everything(), ~suppressWarnings(as.numeric(.)))) %>%
+      filter(complete.cases(.))
+      
+    df_clean
+  })
+
+  # Selected Model Logic
+  selected_model <- reactive({
+    df <- stats_data()
+    req(nrow(df) > 0)
+    model_id <- input$stats_model_select
+    
+    fit <- NULL
+    formula_str <- ""
+    
+    if (model_id == "R1") {
+      # Added pct_overhoused to be more comprehensive about unit usage
+      formula_str <- "rent_per_month ~ pct_bed1 + pct_bed2 + pct_bed3 + pct_overhoused"
+    } else if (model_id == "R2") {
+      formula_str <- "rent_per_month ~ hh_income + pct_lt30_median + pct_bed1 + pct_bed2 + pct_bed3 + pct_overhoused"
+    } else if (model_id == "O1") {
+      formula_str <- "pct_occupied ~ pct_minority + rent_per_month + pct_bed1 + pct_bed2 + pct_bed3"
+    } else if (model_id == "I1") {
+      formula_str <- "hh_income ~ people_per_unit + pct_wage_major + pct_welfare_major + pct_other_major + pct_female_head_child"
+    } else if (model_id == "L1") {
+      formula_str <- "spending_per_month ~ total_dwelling_units + pct_occupied + pct_disabled_all + annl_expns_amnt_prev_yr"
+    } else if (model_id == "L2") {
+      formula_str <- "months_waiting ~ rent_per_month + pct_occupied + hh_income + place_level"
+    }
+    
+    # Check if all vars in formula are in df
+    vars <- all.vars(as.formula(formula_str))
+    if (!all(vars %in% names(df))) {
+      return(list(fit = NULL, error = paste("Missing columns for model:", paste(setdiff(vars, names(df)), collapse=", "))))
+    }
+    
+    fit <- lm(as.formula(formula_str), data = df)
+    list(fit = fit, formula = formula_str, error = NULL)
+  })
+
+  # Render Coefficient Table (Replaces Plot)
+  output$stats_coef_table <- renderDT({
+    mod <- selected_model()
+    req(mod$fit)
+    
+    # Extract coefficients
+    coefs <- summary(mod$fit)$coefficients
+    df_coefs <- as.data.frame(coefs)
+    df_coefs$Variable <- rownames(coefs)
+    
+    # Clean variable names
+    df_coefs$Variable <- sapply(df_coefs$Variable, get_label)
+    
+    # Select and rename columns
+    df_coefs <- df_coefs %>%
+      select(Variable, Estimate, `Pr(>|t|)`) %>%
+      rename(
+        `Impact (Estimate)` = Estimate,
+        `Significance (P-Value)` = `Pr(>|t|)`
+      )
+    
+    # Add interpretation column
+    df_coefs$Conclusion <- case_when(
+      df_coefs$`Significance (P-Value)` < 0.001 ~ "Highly Significant",
+      df_coefs$`Significance (P-Value)` < 0.05 ~ "Significant",
+      df_coefs$`Significance (P-Value)` < 0.1 ~ "Marginal",
+      TRUE ~ "Not Significant"
+    )
+    
+    datatable(df_coefs, 
+              options = list(
+                dom = 't', 
+                pageLength = 15, 
+                scrollX = TRUE,
+                initComplete = JS(
+                  "function(settings, json) {",
+                  "$(this.api().table().header()).css({'background-color': '#2c3e50', 'color': '#fff'});",
+                  "}"
+                )
+              ),
+              rownames = FALSE,
+              class = 'cell-border stripe hover') %>%
+      formatRound(columns = c('Impact (Estimate)'), digits = 2) %>%
+      formatSignif(columns = c('Significance (P-Value)'), digits = 3) %>%
+      formatStyle(
+        'Conclusion',
+        color = styleEqual(
+          c("Highly Significant", "Significant", "Marginal", "Not Significant"), 
+          c("green", "green", "orange", "gray")
+        ),
+        fontWeight = styleEqual(
+          c("Highly Significant", "Significant"), 
+          c("bold", "bold")
+        )
+      )
+  })
+
+  # Value Box: R-Squared
+  output$stats_r2_box <- renderValueBox({
+    mod <- selected_model()
+    if (is.null(mod$fit)) return(valueBox("N/A", "Model Fit", icon = icon("chart-bar"), color = "red"))
+    
+    r2 <- summary(mod$fit)$r.squared
+    color <- if (r2 > 0.5) "green" else if (r2 > 0.3) "orange" else "red"
+    
+    valueBox(
+      paste0(round(r2 * 100, 1), "%"),
+      "Explained Variance (R²)",
+      icon = icon("percentage"),
+      color = color
+    )
+  })
+
+  # Value Box: P-Value
+  output$stats_p_box <- renderValueBox({
+    mod <- selected_model()
+    if (is.null(mod$fit)) return(valueBox("N/A", "Significance", icon = icon("question"), color = "red"))
+    
+    f <- summary(mod$fit)$fstatistic
+    p_val <- pf(f[1], f[2], f[3], lower.tail = FALSE)
+    
+    label <- if (p_val < 0.001) "< 0.001" else round(p_val, 3)
+    color <- if (p_val < 0.05) "green" else "red"
+    
+    valueBox(
+      label,
+      "Model Significance (P-Value)",
+      icon = icon("check-circle"),
+      color = color
+    )
+  })
+
+  # Value Box: Key Driver
+  output$stats_driver_box <- renderValueBox({
+    mod <- selected_model()
+    if (is.null(mod$fit)) return(valueBox("N/A", "Key Driver", icon = icon("key"), color = "blue"))
+    
+    coefs <- summary(mod$fit)$coefficients
+    # Exclude intercept
+    if (nrow(coefs) > 1) {
+      coefs <- coefs[-1, , drop = FALSE]
+      # Find max absolute t-value
+      top_idx <- which.max(abs(coefs[, "t value"]))
+      top_var <- rownames(coefs)[top_idx]
+      # Clean variable name (remove backticks if any)
+      top_var <- gsub("`", "", top_var)
+      label <- get_label(top_var)
+    } else {
+      label <- "None"
+    }
+    
+    valueBox(
+      label,
+      "Strongest Predictor",
+      icon = icon("arrow-up"),
+      color = "blue"
+    )
+  })
+
+  # Model Summary Output
+  output$stats_model_summary <- renderPrint({
+    mod <- selected_model()
+    req(mod$fit)
+    summary(mod$fit)
+  })
+  
+  # Model Interpretation
+  output$stats_model_interpretation <- renderUI({
+    mod <- selected_model()
+    req(mod$fit)
+    
+    s <- summary(mod$fit)
+    r2 <- s$r.squared
+    
+    model_id <- input$stats_model_select
+    
+    title_text <- ""
+    body_text <- ""
+    
+    if (model_id == "R2") {
+      title_text <- "Strong Predictor of Rent"
+      body_text <- "Our analysis shows that <b>Household Income</b> and <b>Poverty Levels</b> are the most important factors in determining rent. This confirms that public housing rent is heavily tied to how much a family earns."
+    } else if (model_id == "I1") {
+      title_text <- "Income Drivers Identified"
+      body_text <- "We found that <b>Household Size</b> and the <b>Source of Income</b> (Wages vs. Welfare) strongly predict total household income. Larger families and those relying on wages tend to have higher reported incomes."
+    } else if (model_id == "O1") {
+      title_text <- "Occupancy is Complex"
+      body_text <- "Only about 30% of the variation in occupancy rates can be explained by rent and demographics. This suggests that <b>Location</b> and <b>Building Condition</b> (which are not in this model) likely play a huge role in whether units are full."
+    } else if (model_id == "R1") {
+      title_text <- "Bedroom Size Matters, but..."
+      body_text <- "While larger apartments do rent for more, bedroom size alone only explains about 40% of the rent price. Income is a much stronger predictor than just the size of the unit."
+    } else if (model_id %in% c("L1", "L2")) {
+      title_text <- "Weak Relationship Found"
+      body_text <- "The data does <b>not</b> show a strong link here. Factors like 'Wait Times' and 'Project Spending' are likely driven by complex administrative decisions or local policies that aren't captured in this dataset."
+    }
     
     HTML(paste0(
-      "<div class='row'>",
-      content,
+      "<div style='font-size: 15px; line-height: 1.6;'>",
+      "<h4 style='margin-top: 0; color: #2c3e50;'>", title_text, "</h4>",
+      "<p>", body_text, "</p>",
       "</div>"
     ))
   })
