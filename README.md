@@ -85,9 +85,5 @@ runGitHub("Your-Repo-Name", "Your-Username")
 
 **Eyong Defang**
 Data Science Student
-Interests: housing, public policy, applied analytics
-
-**Data Update Cycle:** HUD quarterly release
-
 ```
 
