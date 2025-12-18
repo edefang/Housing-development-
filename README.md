@@ -3,7 +3,7 @@ Here it is rewritten cleanly in **proper GitHub README.md format** — concise, 
 ````md
 # Public Housing Development Analysis Dashboard
 
-🔗 **Live Dashboard:** https://edefang.shinyapps.io/House/
+**Live Dashboard:** https://edefang.shinyapps.io/House/
 
 ## Project Overview
 
