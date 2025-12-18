@@ -1,94 +1,93 @@
-Public Housing Development Analysis Dashboard
+Here it is rewritten cleanly in **proper GitHub README.md format** — concise, structured, and professional, with no AI tone and no filler. You can paste this directly into `README.md`.
 
-Live Dashboard: https://edefang.shinyapps.io/House/
+````md
+# Public Housing Development Analysis Dashboard
 
-Project Overview
+🔗 **Live Dashboard:** https://edefang.shinyapps.io/House/
 
-This project analyzes federally assisted public housing across the United States using data from the U.S. Department of Housing and Urban Development (HUD). I built an interactive dashboard to examine housing availability, rent structure, household income, and resident demographics at both the national and state levels.
+## Project Overview
 
-The focus of the project is to understand how public housing operates in practice and how rent, income, and household characteristics interact within federally subsidized systems. The dataset represents outcomes for nearly 900,000 households nationwide.
+This project analyzes federally assisted public housing across the United States using data from the U.S. Department of Housing and Urban Development (HUD). The interactive dashboard examines housing availability, rent structure, household income, and resident demographics at both national and state levels.
 
-Project Motivation
+The goal is to better understand how public housing operates in practice and how policy-driven rent structures align with household income. The dataset represents nearly **900,000 households nationwide**.
 
-Housing affordability is often discussed using private market data, while public housing is treated as a black box. I wanted to look directly at how public housing works, using real administrative data, and evaluate whether rent and allocation patterns reflect the policy goals behind HUD programs.
+## Project Motivation
 
-This project also reflects my interest in applying data analysis to real social systems, especially in areas like housing equity, public policy, and resource allocation.
+Public housing is often discussed using summaries or private market comparisons, but rarely explored directly through data. This project focuses on public housing itself, using administrative HUD data to evaluate affordability, allocation patterns, and demographic outcomes.
 
-Dashboard Components
+The project also reflects my interest in applying data science to real-world systems, particularly in housing, public policy, and equity-focused analysis.
 
-The dashboard is organized into four sections:
+## Dashboard Components
 
-National Overview
-A high-level view of public housing across all 50 states, including total housing units, occupancy rates (approximately 95.6%), and vacancy trends.
+- **National Overview**  
+  A high-level view of public housing across all 50 states, including total units, occupancy rates (approximately **95.6%**), and vacancy trends.
 
-Financial Analysis
-Examines the relationship between Median Household Income ($18,254) and Average Monthly Rent ($412), with a focus on how federal subsidies influence affordability.
+- **Financial Analysis**  
+  Examines the relationship between **Median Household Income ($18,254)** and **Average Monthly Rent ($412)**, highlighting the role of federal subsidies.
 
-Demographic Insights
-Provides a breakdown of household characteristics, showing that:
+- **Demographic Insights**  
+  Household-level characteristics show that:
+  - **73.9% of households are female-headed**
+  - **33.8% include a person with a disability**
 
-73.9% of households are female-headed
+- **Statistical Modeling**  
+  Linear regression is used to identify the primary factors influencing monthly rent in public housing.
 
-33.8% include a person with a disability
+## Statistical Findings
 
-Statistical Modeling
-Uses linear regression to identify the key factors that influence monthly rent in public housing.
+- **Model Fit:**  
+  Explains **85.9% of the variance in rent (R² = 0.859)**
 
-Statistical Findings
+- **Statistical Significance:**  
+  Overall model significance (**p-value < 0.001**)
 
-The regression model produced the following results:
+- **Primary Predictor:**  
+  Household income is the strongest determinant of rent.
 
-Model Fit:
-The model explains 85.9% of the variance in rent (R² = 0.859)
+- **Bedroom Count:**  
+  Number of bedrooms is not a statistically significant predictor of rent, unlike in private housing markets.
 
-Statistical Significance:
-The overall model is statistically significant (p-value < 0.001)
+## Tools and Technologies
 
-Primary Driver of Rent:
-Household income is the strongest predictor of rent, consistent with HUD’s income-based rent structure.
+- **Language:** R  
+- **Framework:** Shiny  
+- **Visualization:** ggplot2, Leaflet  
+- **Analysis:** Linear Regression  
+- **Data Source:** U.S. Department of Housing and Urban Development (HUD)
 
-Bedroom Count:
-The number of bedrooms was not a statistically significant factor in determining rent, which differs from private housing market behavior.
+## Repository Structure
 
-Tools and Technologies
-
-Language: R
-
-Framework: Shiny
-
-Visualization: ggplot2, Leaflet
-
-Analysis: Linear Regression
-
-Data Source: U.S. Department of Housing and Urban Development (HUD)
-
-Repository Structure
+```text
 ├── app.R                # Main Shiny application
 ├── data/                # Processed HUD datasets
 ├── R/                   # Data cleaning and analysis scripts
 ├── www/                 # Styling and image assets
 └── README.md            # Project documentation
+````
 
-Key Takeaways
+## Key Takeaways
 
-Household Structure:
-Approximately 91% of households with children are single-parent households, indicating a strong need for complementary social support services.
+* **Household Structure:**
+  Approximately **91% of households with children are single-parent households**, indicating a need for additional support services.
 
-Unit Allocation:
-The presence of single occupants in multi-bedroom units suggests potential inefficiencies that could be addressed to reduce waitlists.
+* **Unit Allocation:**
+  Single occupants in multi-bedroom units suggest potential inefficiencies that could be addressed to reduce waitlists.
 
-Running the Project Locally
+## Running the Project Locally
 
-To run the dashboard locally, install the required packages and use:
-
+```r
 install.packages(c("shiny", "tidyverse", "leaflet", "ggplot2"))
 library(shiny)
 runGitHub("Your-Repo-Name", "Your-Username")
+```
 
-Author
+## Author
 
-Eyong Defang
+**Eyong Defang**
 Data Science Student
-Interested in housing, public policy, and applied analytics
+Interests: housing, public policy, applied analytics
 
-Data Update Cycle: HUD quarterly release
+**Data Update Cycle:** HUD quarterly release
+
+```
+
