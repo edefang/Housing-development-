@@ -1,5 +1,3 @@
-Here it is rewritten cleanly in **proper GitHub README.md format** — concise, structured, and professional, with no AI tone and no filler. You can paste this directly into `README.md`.
-
 ````md
 # Public Housing Development Analysis Dashboard
 
