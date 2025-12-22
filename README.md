@@ -79,9 +79,3 @@ library(shiny)
 runGitHub("Your-Repo-Name", "Your-Username")
 ```
 
-## Author
-
-**Eyong Defang**
-Data Science Student
-```
-
